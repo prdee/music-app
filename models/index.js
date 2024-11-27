@@ -48,32 +48,51 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Song Schema
 const songSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Please provide song name'],
-    trim: true
-  },
-  author: {
-    type: String,
-    required: [true, 'Please provide song author']
-  },
-  songImage: {
-    type: String,
-    default: 'default-song-image.jpg'
-  },
-  songUrl: {
-    type: String,
-    required: [true, 'Please provide song URL']
-  },
-  albumId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Album'
-  }
-});
+    name: {
+      type: String,
+      required: [true, 'Please provide song name'],
+      trim: true
+    },
+    author: {
+      type: String,
+      required: [true, 'Please provide song author']
+    },
+    songImage: {
+      type: String,
+      default: 'default-song-image.jpg'
+    },
+    songUrl: {
+      type: String,
+      required: [true, 'Please provide song URL']
+    },
+    albumId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Album'
+    },
+    genre: {
+      type: String,
+      enum: ['Worship', 'Gospel', 'Christian Rock', 'Contemporary Christian', 'Hymn', 'Other'],
+      default: 'Other'
+    },
+    duration: {
+      type: Number, // Duration in seconds
+      default: 0
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  });
 
-// Album Schema
 const albumSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -97,7 +116,6 @@ const albumSchema = new mongoose.Schema({
   }]
 });
 
-// Playlist Schema
 const playlistSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -121,7 +139,6 @@ const playlistSchema = new mongoose.Schema({
   }]
 });
 
-// Podcast Schema
 const podcastSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -151,6 +168,20 @@ const Song = mongoose.model('Song', songSchema);
 const Album = mongoose.model('Album', albumSchema);
 const Playlist = mongoose.model('Playlist', playlistSchema);
 const Podcast = mongoose.model('Podcast', podcastSchema);
+
+songSchema.virtual('album', {
+    ref: 'Album',
+    localField: 'albumId',
+    foreignField: '_id',
+    justOne: true
+  });
+  
+  songSchema.virtual('creator', {
+    ref: 'User',
+    localField: 'createdBy',
+    foreignField: '_id',
+    justOne: true
+  });
 
 module.exports = {
   User,
